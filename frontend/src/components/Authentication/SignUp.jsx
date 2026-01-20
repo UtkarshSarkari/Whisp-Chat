@@ -4,6 +4,7 @@ import { Field, Input, InputGroup } from "@chakra-ui/react";
 import { toaster } from "../../components/ui/toaster";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../../config/api";
 
 const SignUp = () => {
   const [show, setShow] = useState(false);
@@ -48,7 +49,7 @@ const SignUp = () => {
         },
       };
       const { data } = await axios.post(
-        "/api/user",
+        `${API_URL}/api/user`,
         {
           name,
           email,

@@ -12,6 +12,7 @@ import { useState } from "react";
 import { ChatState } from "../../Context/ChatProvider";
 import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
+import { API_URL } from "../../config/api";
 
 const GroupChatDialog = ({ children }) => {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ const GroupChatDialog = ({ children }) => {
 
     try {
       setLoading(true);
-      const { data } = await axios.get(`/api/user?search=${query}`, {
+      const { data } = await axios.get(`${API_URL}/api/user?search=${query}`, {
         headers: { Authorization: `Bearer ${user.token}` },
       });
       setSearchResult(data);
@@ -53,7 +54,7 @@ const GroupChatDialog = ({ children }) => {
 
     try {
       const { data } = await axios.post(
-        `/api/chat/group`,
+        `${API_URL}/api/chat/group`,
         {
           name: groupChatName,
           users: JSON.stringify(selectedUsers.map((u) => u._id)),

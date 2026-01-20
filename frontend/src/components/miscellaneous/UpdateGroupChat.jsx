@@ -14,6 +14,7 @@ import UserBadgeItem from "../UserAvatar/UserBadgeItem";
 import UserListItem from "../UserAvatar/UserListItem";
 import { toaster } from "../ui/toaster";
 import { EyeIcon } from "lucide-react";
+import { API_URL } from "../../config/api";
 
 const UpdateGroupChatDialog = ({
   fetchMessages,
@@ -38,7 +39,10 @@ const UpdateGroupChatDialog = ({
         headers: { Authorization: `Bearer ${user.token}` },
       };
 
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      const { data } = await axios.get(
+        `${API_URL}/api/user?search=${query}`,
+        config,
+      );
       setSearchResult(data);
     } catch (error) {
       toaster({
@@ -63,7 +67,7 @@ const UpdateGroupChatDialog = ({
       };
 
       const { data } = await axios.put(
-        `/api/chat/rename`,
+        `${API_URL}/api/chat/rename`,
         {
           chatId: selectedChat._id,
           chatName: groupChatName,
@@ -113,7 +117,7 @@ const UpdateGroupChatDialog = ({
       };
 
       const { data } = await axios.put(
-        `/api/chat/groupadd`,
+        `${API_URL}/api/chat/groupadd`,
         {
           chatId: selectedChat._id,
           userId: userToAdd._id,
@@ -156,7 +160,7 @@ const UpdateGroupChatDialog = ({
       };
 
       const { data } = await axios.put(
-        `/api/chat/groupremove`,
+        `${API_URL}/api/chat/groupremove`,
         {
           chatId: selectedChat._id,
           userId: userToRemove._id,

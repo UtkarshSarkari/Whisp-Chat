@@ -4,7 +4,8 @@ import { Field, Input, InputGroup } from "@chakra-ui/react";
 import { toaster } from "../../components/ui/toaster";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import { ChatState } from "../../Context/ChatProvider";
+import { ChatState } from "../../Context/ChatProvider";
+import { API_URL } from "../../config/api";
 
 const Login = () => {
   const [show, setShow] = useState(false);
@@ -14,7 +15,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  // const { setUser } = ChatState();
+  const { setUser } = ChatState();
 
   const submitHandler = async () => {
     setLoading(true);
@@ -38,7 +39,7 @@ const Login = () => {
       };
 
       const { data } = await axios.post(
-        "/api/user/login",
+        `${API_URL}/api/user/login`,
         { email, password },
         config,
       );
@@ -50,7 +51,7 @@ const Login = () => {
         closable: true,
         position: "bottom",
       });
-      // setUser(data);
+      setUser(data);
       localStorage.setItem("userInfo", JSON.stringify(data));
       setLoading(false);
       navigate("/chats");
