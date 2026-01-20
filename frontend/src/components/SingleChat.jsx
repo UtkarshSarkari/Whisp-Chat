@@ -267,6 +267,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         bg="#e8e8e8"
         h="94%"
         borderRadius="lg"
+        justifyContent="flex-end"
       >
         {loading ? (
           <Text>Loading...</Text>
