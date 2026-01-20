@@ -1,65 +1,74 @@
 const express = require("express");
-const connectDB = require("./config/db");
 const dotenv = require("dotenv");
+const http = require("http");
+const cors = require("cors");
+
+const connectDB = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-const path = require("path");
 
+// Load env vars
 dotenv.config();
+
+// Connect to DB
 connectDB();
+
 const app = express();
 
-app.use(express.json()); // to accept json data
+// Middleware
+app.use(express.json());
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "http://localhost:5173",
+    credentials: true,
+  })
+);
 
+// API routes
 app.use("/api/user", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/message", messageRoutes);
 
-// --------------------------deployment------------------------------
+// Health check route
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 
-const __dirname1 = path.resolve();
-
-if (process.env.NODE_ENV === "production") {
-  // Changed from /frontend/build to /frontend/dist for Vite
-  app.use(express.static(path.join(__dirname1, "/frontend/dist")));
-
-  app.get("/*", (req, res) =>
-    res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html")),
-  );
-} else {
-  app.get("/", (req, res) => {
-    res.send("API is running..");
-  });
-}
-
-// --------------------------deployment------------------------------
-
-// Error Handling middlewares
+// Error handling
 app.use(notFound);
 app.use(errorHandler);
 
+// Server
 const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
 
-const server = app.listen(
-  PORT,
-  console.log(`Server running on PORT ${PORT}...`),
-);
+server.listen(PORT, () => {
+  console.log(`Server running on PORT ${PORT}`);
+});
 
-// Dynamic CORS based on environment
-const io = require("socket.io")(server, {
+// ================= SOCKET.IO =================
+
+const { Server } = require("socket.io");
+
+const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: process.env.NODE_ENV === "production" 
-      ? process.env.FRONTEND_URL 
-      : "http://localhost:5173",
+    origin:
+      process.env.NODE_ENV === "production"
+        ? process.env.FRONTEND_URL
+        : "http://localhost:5173",
     credentials: true,
   },
 });
 
 io.on("connection", (socket) => {
-  console.log("Connected to socket.io");
+  console.log("Socket.io connected");
+
   socket.on("setup", (userData) => {
     socket.join(userData._id);
     socket.emit("connected");
@@ -67,30 +76,29 @@ io.on("connection", (socket) => {
 
   socket.on("join chat", (room) => {
     socket.join(room);
-    console.log("User Joined Room: " + room);
+    console.log("User joined room:", room);
   });
+
   socket.on("typing", (room) => {
-    socket.in(room).emit("typing", room);
+    socket.in(room).emit("typing");
   });
 
   socket.on("stop typing", (room) => {
-    socket.in(room).emit("stop typing", room);
+    socket.in(room).emit("stop typing");
   });
 
-  socket.on("new message", (newMessageRecieved) => {
-    var chat = newMessageRecieved.chat;
+  socket.on("new message", (newMessageReceived) => {
+    const chat = newMessageReceived.chat;
 
-    if (!chat.users) return console.log("chat.users not defined");
+    if (!chat?.users) return;
 
     chat.users.forEach((user) => {
-      if (user._id == newMessageRecieved.sender._id) return;
-
-      socket.in(user._id).emit("message recieved", newMessageRecieved);
+      if (user._id === newMessageReceived.sender._id) return;
+      socket.in(user._id).emit("message received", newMessageReceived);
     });
   });
 
-  socket.off("setup", () => {
-    console.log("USER DISCONNECTED");
-    socket.leave(userData._id);
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected");
   });
 });
