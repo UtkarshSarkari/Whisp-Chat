@@ -164,7 +164,7 @@ const SideDrawer = () => {
           </Portal>
         </Drawer.Root>
         <Text fontSize="2xl" fontFamily="Work sans">
-          Whisper
+          Whisp
         </Text>
         <div className="flex">
           <Menu.Root>
