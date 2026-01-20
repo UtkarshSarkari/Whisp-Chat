@@ -25,7 +25,7 @@ if (process.env.NODE_ENV === "production") {
   // Changed from /frontend/build to /frontend/dist for Vite
   app.use(express.static(path.join(__dirname1, "/frontend/dist")));
 
-  app.get("*", (req, res) =>
+  app.get("/*", (req, res) =>
     res.sendFile(path.resolve(__dirname1, "frontend", "dist", "index.html")),
   );
 } else {
